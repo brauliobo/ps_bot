@@ -22,7 +22,7 @@ class Cache
       return path
     end
 
-    fetch_fill url, path
+    fetch_fill http, url, path
     path
   end
 
@@ -35,10 +35,10 @@ class Cache
       return http.get "file://#{path}"
     end
 
-    fetch_fill url, path
+    fetch_fill http, url, path
   end
 
-  def self.fetch_fill url, path
+  def self.fetch_fill http, url, path
     puts "http: fetching #{url}"
     data = http.get url
     File.write path, data.body
