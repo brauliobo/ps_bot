@@ -2,7 +2,7 @@ source 'https://rubygems.org'
 
 gem 'activesupport'
 gem 'hashie'
-gem 'premailer'
+gem 'concurrent-ruby'
 
 gem 'telegram-bot-ruby'
 gem 'mechanize'

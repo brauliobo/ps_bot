@@ -1,22 +1,32 @@
 require 'bundler/setup'
 require 'active_support/all'
 require 'hashie'
-require 'premailer'
 
 require 'telegram/bot'
 require 'mechanize'
 
-require_relative 'sym_mash'
+require_relative 'exts/sym_mash'
+require_relative 'exts/peach'
 require_relative 'scraper'
 require_relative 'bot'
 
-class PSBot
-end
+bot = Bot.new ENV['TOKEN']
 
 if ps_number = ARGV[0]
-  scraper = Scraper.new
-  pp scraper.fetch ps_number
+
+  if ps_number == 'all'
+    (1..5018).peach do |n|
+      scraper = Scraper.new
+      scraper.fetch n
+    rescue => e
+      STDERR.puts "PS#{n} failed: #{e.message}: #{e.backtrace.join "\n"}"
+    end
+  else
+    ps = scraper.fetch ps_number
+    puts bot.caption ps
+  end
+
   exit
 end
 
-Bot.new(ENV['TOKEN']).start
+bot.start

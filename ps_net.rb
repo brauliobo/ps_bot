@@ -23,19 +23,20 @@ class PSNet
 
     url    = PS_URL % { number: number }
     page   = cached_http.page_get url
-    orig   = format_text page.at('.notranslate p').text
+    roman  = format_text page.at('.notranslate p').text
     trans  = format_text page.css('.lead p').last.text
 
-    url      = AUDIO_URL % { range: range }
-    page     = cached_http.page_get url
+    aurl     = AUDIO_URL % { range: range }
+    page     = cached_http.page_get aurl
     audios   = page.css(:a).select{ |a| a.text.match(/^#{number}/) }
     audio    = audios.first.attr(:href)
     filename = cached_http.audio_get "#{BASE_URL}/#{audio}"
 
     SymMash.new(
       number:   number,
+      url:      url,
       lyrics:   {
-        original:    orig,
+        roman:       roman,
         translation: trans,
       },
       filename: filename,

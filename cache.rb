@@ -10,8 +10,8 @@ class Cache
   self.pages_path  = "#{base_path}/pages"
 
   def self.url_to_path url
-    curl = url.gsub(/https?:\/\//, '').gsub('/', '-')
-    path = CGI.unescape curl
+    path = CGI.unescape url
+    path = url.gsub(/https?:\/\//, '').gsub('/', '-')
     path
   end
 
@@ -31,8 +31,7 @@ class Cache
     if File.exists? path
       puts "cache: hitting #{path}"
       # for HTML parsing of local files
-      http.pluggable_parser.default = http.pluggable_parser['text/html']
-      return http.get "file://#{path}"
+      return local_html_http.get "file://#{path}"
     end
 
     fetch_fill http, url, path
@@ -43,6 +42,12 @@ class Cache
     data = http.get url
     File.write path, data.body
     data
+  end
+
+  def self.local_html_http
+    local_html_http = Mechanize.new
+    local_html_http.pluggable_parser.default = local_html_http.pluggable_parser['text/html']
+    local_html_http
   end
 
 end

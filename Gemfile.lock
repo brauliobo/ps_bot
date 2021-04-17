@@ -18,8 +18,6 @@ GEM
       descendants_tracker (~> 0.0.1)
     concurrent-ruby (1.1.8)
     connection_pool (2.2.5)
-    css_parser (1.9.0)
-      addressable
     descendants_tracker (0.0.4)
       thread_safe (~> 0.3, >= 0.3.1)
     domain_name (0.5.20190701)
@@ -37,8 +35,8 @@ GEM
     faraday-net_http (1.0.1)
     faraday-net_http_persistent (1.0.3)
       net-http-persistent (>= 3.1)
+    ffi (1.15.0-java)
     hashie (4.1.0)
-    htmlentities (4.3.4)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
     i18n (1.8.10)
@@ -69,26 +67,33 @@ GEM
     nokogiri (1.11.3)
       mini_portile2 (~> 2.5.0)
       racc (~> 1.4)
-    premailer (1.14.2)
-      addressable
-      css_parser (>= 1.6.0)
-      htmlentities (>= 4.0.0)
+    nokogiri (1.11.3-java)
+      racc (~> 1.4)
     pry (0.14.0)
       coderay (~> 1.1)
       method_source (~> 1.0)
+    pry (0.14.0-java)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+      spoon (~> 0.0)
     public_suffix (4.0.6)
     racc (1.5.2)
+    racc (1.5.2-java)
     ruby2_keywords (0.0.4)
     rubyntlm (0.6.3)
+    spoon (0.0.6)
+      ffi
     telegram-bot-ruby (0.15.0)
       faraday
       inflecto
       virtus
     thread_safe (0.3.6)
+    thread_safe (0.3.6-java)
     tzinfo (2.0.4)
       concurrent-ruby (~> 1.0)
     unf (0.1.4)
       unf_ext
+    unf (0.1.4-java)
     unf_ext (0.0.7.7)
     virtus (1.0.5)
       axiom-types (~> 0.1)
@@ -100,13 +105,14 @@ GEM
     zeitwerk (2.4.2)
 
 PLATFORMS
+  java
   ruby
 
 DEPENDENCIES
   activesupport
+  concurrent-ruby
   hashie
   mechanize
-  premailer
   pry
   telegram-bot-ruby
 
