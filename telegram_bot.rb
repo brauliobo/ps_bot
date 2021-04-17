@@ -35,19 +35,17 @@ class TelegramBot
 
   def send_ps message, number
     ps    = @scraper.fetch number
-    # opus not supported for bots yet, turned into voice
-    #audio = Mediazip.zip ps.filename
-    audio = ps.filename
+    # opus makes TG use voice instead
+    audio = Mediazip.m4a ps.filename
+    ctype = MIME::Types.type_for(audio).first.content_type
     info message, "sending #{File.basename audio}"
-
-    content_type = MIME::Types.type_for(audio).first.content_type
 
     @bot.api.send_audio(
       chat_id:    message.chat.id,
       title:      ps.name,
       caption:    caption(ps),
       parse_mode: 'MarkdownV2',
-      audio:      Faraday::FilePart.new(audio, content_type),
+      audio:      Faraday::FilePart.new(audio, ctype),
     )
   end
 
