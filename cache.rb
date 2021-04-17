@@ -5,6 +5,8 @@ class Cache
 
   class_attribute :audios_path
   self.audios_path = "#{base_path}/audios"
+  class_attribute :audios_compressed_path
+  self.audios_compressed_path = "#{base_path}/audios_compressed"
 
   class_attribute :pages_path
   self.pages_path  = "#{base_path}/pages"
@@ -15,12 +17,16 @@ class Cache
     path
   end
 
+  def self.present? path, url: nil
+    present = File.exists? path
+    hit     = if url then CGI.unescape url else path end
+    puts "cache: hit for #{hit}" if present
+    present
+  end
+
   def self.download_audio http, url
-    path  = "#{audios_path}/#{url_to_path url}"
-    if File.exists? path
-      puts "cache: hit for #{CGI.unescape url}"
-      return path
-    end
+    path = "#{audios_path}/#{url_to_path url}"
+    return path if present? path, url: url
 
     fetch_fill http, url, path
     path
@@ -28,11 +34,7 @@ class Cache
 
   def self.download_page http, url
     path = "#{pages_path}/#{url_to_path url}"
-    if File.exists? path
-      puts "cache: hit for #{CGI.unescape url}"
-      # for HTML parsing of local files
-      return local_html_http.get "file://#{path}"
-    end
+    return local_html_http.get "file://#{path}" if present? path, url: url
 
     fetch_fill http, url, path
   end
@@ -40,8 +42,12 @@ class Cache
   def self.fetch_fill http, url, path
     puts "http: fetching #{CGI.unescape url}"
     data = http.get url
-    File.write path, data.body
+    write path, data.body
     data
+  end
+
+  def self.write path, data
+    File.write path, data
   end
 
   def self.local_html_http

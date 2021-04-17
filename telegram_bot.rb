@@ -1,3 +1,5 @@
+require_relative 'mediazip'
+
 class TelegramBot
 
   def initialize token
@@ -14,10 +16,10 @@ class TelegramBot
         when '/start'
           send_help message
         when /\/ps (\d+)/i
-          puts "bot: #{message.chat.title}: sending ps #{$1}"
+          info message, "sending ps #{$1}"
           send_ps message, $1
         else
-          puts "bot: #{message.chat.title}: ignoring message: #{text}"
+          info message, "ignoring message: #{text}"
         end
       end
     end
@@ -32,16 +34,21 @@ class TelegramBot
   end
 
   def send_ps message, number
-    ps           = @scraper.fetch number
-    content_type = MIME::Types.type_for(ps.filename).first.content_type
+    ps    = @scraper.fetch number
+    # opus not supported for bots yet, turned into voice
+    #audio = Mediazip.zip ps.filename
+    audio = ps.filename
+    info message, "sending #{File.basename audio}"
+
+    content_type = MIME::Types.type_for(audio).first.content_type
+
     @bot.api.send_audio(
       chat_id:    message.chat.id,
+      title:      ps.name,
       caption:    caption(ps),
       parse_mode: 'MarkdownV2',
-      audio:      Faraday::UploadIO.new(ps.filename, content_type),
+      audio:      Faraday::FilePart.new(audio, content_type),
     )
-
-    File.unlink ps.filename
   end
 
   def caption ps
@@ -50,6 +57,10 @@ class TelegramBot
     t += "\n\n#{i e ps.lyrics.translation}"
     t += "\n\n#{e ps.url}"
     me t
+  end
+
+  def info message, out
+    puts "bot: #{message.chat.title}: #{out}"
   end
 
   protected
