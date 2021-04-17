@@ -1,4 +1,4 @@
-class Bot
+class TelegramBot
 
   def initialize token
     @token   = token

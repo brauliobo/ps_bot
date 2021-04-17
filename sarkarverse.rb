@@ -16,9 +16,8 @@ class Sarkarverse
   end
 
   def find number
-    number  = number.to_s.rjust 4, '0'
-    row  = listing.at("tr td:first-child:contains('#{number}')")&.parent
-    row
+    number = number.to_s.rjust 4, '0'
+    listing.at("tr td:first-child:contains('#{number}')")&.parent
   end
 
   def fetch number
@@ -28,6 +27,7 @@ class Sarkarverse
     path = row.at(:a).attr :href
     url  = "#{BASE_URL}#{path}"
     page = cached_http.page_get url
+    name = page.at(:h1).text
 
     if lyrics = page.at('h2:contains("Lyrics") + table.wikitable')
       lyrics  = page.css('.poem').map{ |l| l.text.strip }
@@ -38,14 +38,19 @@ class Sarkarverse
       lyrics = SymMash.new translation: lyrics
     end
 
-    aurl     = page.at('table.infobox audio').attr :src
-    filename = cached_http.audio_get aurl
+    audios = page.css('table.infobox audio')
+    fns    = audios.map do |audio|
+      aurl     = audio.attr :src
+      filename = cached_http.audio_get aurl
+      filename
+    end
 
     SymMash.new(
       number:   number,
       url:      url,
+      name:     name,
       lyrics:   lyrics,
-      filename: filename,
+      filename: fns.first,
     )
   end
 

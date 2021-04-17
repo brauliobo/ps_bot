@@ -8,15 +8,15 @@ require 'mechanize'
 require_relative 'exts/sym_mash'
 require_relative 'exts/peach'
 require_relative 'scraper'
-require_relative 'bot'
+require_relative 'telegram_bot'
 
-bot = Bot.new ENV['TOKEN']
+bot = TelegramBot.new ENV['TOKEN']
 
 if ps_number = ARGV[0]
+  scraper = Scraper.new
 
   if ps_number == 'all'
     (1..5018).peach do |n|
-      scraper = Scraper.new
       scraper.fetch n
     rescue => e
       STDERR.puts "PS#{n} failed: #{e.message}: #{e.backtrace.join "\n"}"
