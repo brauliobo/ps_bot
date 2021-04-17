@@ -13,8 +13,8 @@ require_relative 'bot'
 class PSBot
 end
 
-scraper = Scraper.new
 if ps_number = ARGV[0]
+  scraper = Scraper.new
   pp scraper.fetch ps_number
   exit
 end

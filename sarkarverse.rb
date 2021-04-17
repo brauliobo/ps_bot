@@ -31,11 +31,11 @@ class Sarkarverse
 
     if lyrics = ps_page.at('h2:contains("Lyrics") + table.wikitable')
       lyrics  = lyrics.css(:tr).to_a.second
-      lyrics  = lyrics.css(:td).map{ |l| l.text }
+      lyrics  = lyrics.css(:td).map{ |l| l.text.strip }
       lyrics  = [:roman, :original, :translation].zip lyrics
       lyrics  = SymMash.new Hash[lyrics]
     else
-      lyrics = ps_page.at('h2:contains("Lyrics") + .poem').text
+      lyrics = ps_page.at('h2:contains("Lyrics") + .poem').text.strip
       lyrics = SymMash.new translation: lyrics
     end
 

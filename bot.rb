@@ -1,7 +1,8 @@
 class Bot
 
   def initialize token
-    @token = token
+    @token   = token
+    @scraper = Scraper.new
   end
 
   def start
@@ -19,7 +20,7 @@ class Bot
   end
 
   def send_ps bot, message, number
-    ps           = scraper.fetch number
+    ps           = @scraper.fetch number
     content_type = MIME::Types.type_for(ps.filename).first.content_type
     bot.api.send_audio(
       chat_id: message.chat.id,
