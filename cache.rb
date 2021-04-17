@@ -11,14 +11,14 @@ class Cache
 
   def self.url_to_path url
     path = CGI.unescape url
-    path = url.gsub(/https?:\/\//, '').gsub('/', '-')
+    path = path.gsub(/https?:\/\//, '').gsub('/', '-')
     path
   end
 
   def self.download_audio http, url
     path  = "#{audios_path}/#{url_to_path url}"
     if File.exists? path
-      puts "cache: hitting #{path}"
+      puts "cache: hit for #{CGI.unescape url}"
       return path
     end
 
@@ -29,7 +29,7 @@ class Cache
   def self.download_page http, url
     path = "#{pages_path}/#{url_to_path url}"
     if File.exists? path
-      puts "cache: hitting #{path}"
+      puts "cache: hit for #{CGI.unescape url}"
       # for HTML parsing of local files
       return local_html_http.get "file://#{path}"
     end
@@ -38,7 +38,7 @@ class Cache
   end
 
   def self.fetch_fill http, url, path
-    puts "http: fetching #{url}"
+    puts "http: fetching #{CGI.unescape url}"
     data = http.get url
     File.write path, data.body
     data
