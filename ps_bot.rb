@@ -1,38 +1,22 @@
-require 'bundle/setup'
+require 'bundler/setup'
+require 'active_support/all'
+require 'hashie'
+require 'premailer'
 
-TOKEN      = ENV['TOKEN']
-PS_LISTING = 'https://sarkarverse.org/wiki/List_of_songs_of_Prabhat_Samgiita'
+require 'telegram/bot'
+require 'mechanize'
 
-def http
-  @http ||= Mechanize.new
-end
-def ps_listing
-  @ps_listing ||= http.get PS_LISTING
-end
+require_relative 'sym_mash'
+require_relative 'scraper'
+require_relative 'bot'
 
-if ps_number = ARGV[0] then pp parse ps_number end
-
-def send_ps bot, message, number
-  ps           = parse number
-  content_type = MIME::Types.type_for(ps.filename).first.content_type
-  bot.api.send_audio(
-    chat_id: message.chat.id,
-    caption: ps.lyrics.translation,
-    audio:   Faraday::UploadIO.new(ps.filename, content_type),
-  )
-
-  File.unlink ps.filename
+class PSBot
 end
 
-Telegram::Bot::Client.run TOKEN do |bot|
-  bot.listen do |message|
-    case text = message.text
-    when /ps(\d+)/
-      puts "#{message.chat.title}: sending ps #{$1}"
-      send_ps bot, message, $1
-    else
-      puts "#{message.chat.title}: ignoring message: #{text}"
-    end
-  end
+scraper = Scraper.new
+if ps_number = ARGV[0]
+  pp scraper.fetch ps_number
+  exit
 end
 
+Bot.new(ENV['TOKEN']).start
