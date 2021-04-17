@@ -1,15 +1,15 @@
-require_relative 'cache'
-require_relative 'http'
+require_relative 'cached_http'
 
 class Sarkarverse
 
-  PS_LISTING = 'https://sarkarverse.org/wiki/List_of_songs_of_Prabhat_Samgiita'
+  BASE_URL   = 'https://sarkarverse.org'
+  PS_LISTING = "#{BASE_URL}/wiki/List_of_songs_of_Prabhat_Samgiita"
 
-  class_attribute :http
-  self.http = Http.new
+  class_attribute :cached_http
+  self.cached_http = CachedHttp.new
 
   def ps_listing
-    @ps_listing ||= http.get PS_LISTING
+    @ps_listing ||= cached_http.page_get PS_LISTING
   end
 
   def exists? number
@@ -27,7 +27,7 @@ class Sarkarverse
     raise "sarkarverse: can't find with #{number}" unless ps_row
 
     ps_link = ps_row.at(:a).attr :href
-    ps_page = http.get ps_link
+    ps_page = cached_http.page_get ps_link
 
     if lyrics = ps_page.at('h2:contains("Lyrics") + table.wikitable')
       lyrics  = lyrics.css(:tr).to_a.second
@@ -39,8 +39,8 @@ class Sarkarverse
       lyrics = SymMash.new translation: lyrics
     end
 
-    audio    = ps_page.at('table.infobox audio').attr :src
-    filename = Cache.download_audio http, audio
+    url      = ps_page.at('table.infobox audio').attr :src
+    filename = cached_http.audio_get url
 
     SymMash.new(
       number:   number,

@@ -6,3 +6,7 @@ gem 'premailer'
 
 gem 'telegram-bot-ruby'
 gem 'mechanize'
+
+group :development do
+  gem 'pry'
+end
