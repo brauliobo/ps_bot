@@ -15,9 +15,19 @@ class TelegramBot
         case text = message.text
         when '/start'
           send_help message
-        when /\/ps (\d+)/i
-          info message, "sending ps #{$1}"
+
+        when /\/ps (\d+)$/i
           send_ps message, $1
+
+        when /\/ps (.+)/i
+          refs = $1.split(/[, ]/)
+          refs.each do |n|
+            next n.split('-').inject{ |s,e| s.to_i..e.to_i }.each do |rn|
+              send_ps message, rn
+            end if n.index('-')
+
+            send_ps message, n
+          end
         else
           info message, "ignoring message: #{text}"
         end
@@ -34,6 +44,8 @@ class TelegramBot
   end
 
   def send_ps message, number
+    info message, "sending ps #{$1}"
+
     ps    = @scraper.fetch number
     if !ps.filename
       @bot.api.send_message(
