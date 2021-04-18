@@ -1,6 +1,7 @@
 require_relative 'cached_http'
+require_relative 'scraper_base'
 
-class Sarkarverse
+class Sarkarverse < ScraperBase
 
   BASE_URL = 'https://sarkarverse.org'
   LISTING  = "#{BASE_URL}/wiki/List_of_songs_of_Prabhat_Samgiita"
@@ -30,11 +31,11 @@ class Sarkarverse
     name = page.at(:h1).text.strip
 
     if lyrics = page.at('h2:contains("Lyrics") + table.wikitable')
-      lyrics  = page.css('.poem').map{ |l| l.text.strip }
+      lyrics  = page.css('.poem').map{ |l| parse_text l.text }
       lyrics  = %i[roman original translation].zip lyrics
       lyrics  = SymMash.new Hash[lyrics]
     else
-      lyrics = page.at('h2:contains("Lyrics") + .poem').text.strip
+      lyrics = parse_text page.at('h2:contains("Lyrics") + .poem').text
       lyrics = SymMash.new translation: lyrics
     end
 

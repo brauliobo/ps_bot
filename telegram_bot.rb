@@ -61,7 +61,12 @@ class TelegramBot
   def caption ps
     t  = "*Prabhat Samgiit ##{ps.number.to_i}: #{ps.name}*"
     t += "\n\n#{i e ps.lyrics.roman}" if ps.lyrics.roman
-    t += "\n\n#{i e ps.lyrics.translation}"
+
+    # prevent caption max size (1024) error
+    trans = i e ps.lyrics.translation
+    t += if t.size + trans.size < 900 then "\n\n#{trans}"
+         else "\n\n(Translation suppressed due to Telegram limits, click the link below)" end
+
     t += "\n\n#{e ps.url}"
     t += "\n(No audio available)" if !ps.filename
     me t

@@ -1,6 +1,7 @@
 require_relative 'cached_http'
+require_relative 'scraper_base'
 
-class PSNet
+class PSNet < ScraperBase
 
   class_attribute :cached_http
   self.cached_http = CachedHttp.new
@@ -24,8 +25,8 @@ class PSNet
     url    = PS_URL % { number: number }
     page   = cached_http.page_get url
     name   = page.at(:h4).text.strip
-    roman  = format_text page.at('.notranslate p').text
-    trans  = format_text page.css('.lead:last-child p').map(&:text).join.strip
+    roman  = parse_text page.at('.notranslate p').text
+    trans  = parse_text page.css('.lead:last-child p').map(&:text).join
 
     aurl     = AUDIO_URL % { range: range }
     page     = cached_http.page_get aurl
@@ -49,11 +50,5 @@ class PSNet
   end
 
   protected
-
-  def format_text text
-    text = text.gsub(/\r\n\r\n/, "\n")
-    text = text.gsub(/\r\n\n/, "\n")
-    text.strip
-  end
 
 end
