@@ -51,7 +51,7 @@ class TelegramBot
   end
 
   def send_ps msg, number
-    info msg, "sending ps #{$1}"
+    info msg, "sending ps #{number}"
 
     ps    = @scraper.fetch number
     if !ps.filename

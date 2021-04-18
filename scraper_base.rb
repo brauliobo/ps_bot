@@ -5,9 +5,9 @@ class ScraperBase
   end
 
   def parse_text text
-    text.gsub!(/\r\n/, "\n")
+    text.gsub!(/\r\n\r\n/, "\n")
     text.gsub!(/\r/, "\n")
-    text.gsub!(/\n\n/, "\n")
+    text.gsub!(/\n\n\n/, "\n\n")
     text.strip!
 
     if text.size > 512
