@@ -11,45 +11,52 @@ class TelegramBot
     Telegram::Bot::Client.run @token do |bot|
       puts "bot: started, listening"
       @bot = bot
-      @bot.listen do |message|
-        case text = message.text
-        when '/start'
-          send_help message
-
-        when /\/ps (\d+)$/i
-          send_ps message, $1
-
-        when /\/ps (.+)/i
-          refs = $1.split(/[, ]/)
-          refs.each do |n|
-            next n.split('-').inject{ |s,e| s.to_i..e.to_i }.each do |rn|
-              send_ps message, rn
-            end if n.index('-')
-
-            send_ps message, n
-          end
+      @bot.listen do |msg|
+        case msg
+        when Telegram::Bot::Types::InlineQuery
+          parse_number_and_send_ps msg, msg.query
         else
-          info message, "ignoring message: #{text}"
+          case text = msg.text
+          when '/start'
+            send_help msg
+
+          when /\/ps (\d+)$/i, /\/ps (.+)/i
+            parse_number_and_send_ps msg, $1
+
+          else
+            info msg, "ignoring message: #{text}"
+          end
         end
       end
     end
   end
 
-  def send_help message
+  def send_help msg
     @bot.api.send_message(
-      chat_id:    message.chat.id,
+      chat_id:    msg.chat.id,
       text:       me("To receive a PS, type /ps <number>"),
       parse_mode: 'MarkdownV2',
     )
   end
 
-  def send_ps message, number
-    info message, "sending ps #{$1}"
+  def parse_number_and_send_ps msg, values
+    refs = values.split(/[, ]/)
+    refs.each do |n|
+      next n.split('-').inject{ |s,e| s.to_i..e.to_i }.each do |rn|
+        send_ps msg, rn
+      end if n.index('-')
+
+      send_ps msg, n
+    end
+  end
+
+  def send_ps msg, number
+    info msg, "sending ps #{$1}"
 
     ps    = @scraper.fetch number
     if !ps.filename
       @bot.api.send_message(
-        chat_id:    message.chat.id,
+        chat_id:    msg_orig(msg).id,
         text:       caption(ps),
         parse_mode: 'MarkdownV2',
       )
@@ -59,10 +66,10 @@ class TelegramBot
     # opus makes TG use voice instead
     audio = Mediazip.m4a ps.filename
     ctype = MIME::Types.type_for(audio).first.content_type
-    info message, "sending #{File.basename audio}"
+    info msg, "sending #{File.basename audio}"
 
     @bot.api.send_audio(
-      chat_id:    message.chat.id,
+      chat_id:    msg_orig(msg).id,
       title:      ps.name,
       caption:    caption(ps),
       parse_mode: 'MarkdownV2',
@@ -84,11 +91,19 @@ class TelegramBot
     me t
   end
 
-  def info message, out
-    puts "bot: #{message.chat.title}: #{out}"
+  def info msg, out
+    orig = msg_orig msg
+    ctx  = if orig.respond_to? :title then orig.title else orig.username end
+    puts "bot: #{ctx}: #{out}"
   end
 
   protected
+
+  def msg_orig msg
+    return msg.chat if msg.respond_to? :chat
+    return msg.from if msg.respond_to? :from
+  end
+
 
   MARKDOWN_RESERVED = %w[[ ] ( ) ~ ` > # + - = | { } . !]
 
