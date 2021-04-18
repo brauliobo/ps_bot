@@ -15,7 +15,7 @@ class TelegramBot
         case msg
         when Telegram::Bot::Types::InlineQuery
           parse_number_and_send_ps msg, msg.query
-        else
+        when Telegram::Bot::Types::Message
           case text = msg.text
           when '/start'
             send_help msg
