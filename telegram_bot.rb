@@ -12,26 +12,32 @@ class TelegramBot
       puts "bot: started, listening"
       @bot = bot
       @bot.listen do |msg|
-        case msg
-        when Telegram::Bot::Types::InlineQuery
-          parse_number_and_send_ps msg, msg.query
-        when Telegram::Bot::Types::Message
-          case text = msg.text
-          when '/start'
-            send_help msg
-
-          when /\/ps (\d+)$/i, /\/ps (.+)/i
-            parse_number_and_send_ps msg, $1
-
-          else
-            info msg, "ignoring message: #{text}"
-          end
+        Thread.new do
+          react msg
         end
-      rescue => e
-        STDERR.puts "#{e.message}: #{e.backtrace.join "\n"}"
-        binding.pry if ENV['PRY']
       end
     end
+  end
+
+  def react msg
+    case msg
+    when Telegram::Bot::Types::InlineQuery
+      parse_number_and_send_ps msg, msg.query
+    when Telegram::Bot::Types::Message
+      case text = msg.text
+      when '/start'
+        send_help msg
+
+      when /\/ps (\d+)$/i, /\/ps (.+)/i
+        parse_number_and_send_ps msg, $1
+
+      else
+        info msg, "ignoring message: #{text}"
+      end
+    end
+  rescue => e
+    STDERR.puts "#{e.message}: #{e.backtrace.join "\n"}"
+    binding.pry if ENV['PRY']
   end
 
   def send_help msg
