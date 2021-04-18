@@ -1,4 +1,5 @@
 require 'bundler/setup'
+require 'pry'
 require 'active_support/all'
 require 'hashie'
 
