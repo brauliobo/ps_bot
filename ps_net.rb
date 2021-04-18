@@ -23,9 +23,9 @@ class PSNet
 
     url    = PS_URL % { number: number }
     page   = cached_http.page_get url
-    name   = page.at(:h4).text
+    name   = page.at(:h4).text.strip
     roman  = format_text page.at('.notranslate p').text
-    trans  = format_text page.css('.lead p').last.text
+    trans  = format_text page.css('.lead:last-child p').map(&:text).join.strip
 
     aurl     = AUDIO_URL % { range: range }
     page     = cached_http.page_get aurl
@@ -51,7 +51,9 @@ class PSNet
   protected
 
   def format_text text
-    text.gsub(/\r\n\r\n/, "\n").strip
+    text = text.gsub(/\r\n\r\n/, "\n")
+    text = text.gsub(/\r\n\n/, "\n")
+    text.strip
   end
 
 end

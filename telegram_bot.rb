@@ -35,6 +35,15 @@ class TelegramBot
 
   def send_ps message, number
     ps    = @scraper.fetch number
+    if !ps.filename
+      @bot.api.send_message(
+        chat_id:    message.chat.id,
+        text:       caption(ps),
+        parse_mode: 'MarkdownV2',
+      )
+      return
+    end
+
     # opus makes TG use voice instead
     audio = Mediazip.m4a ps.filename
     ctype = MIME::Types.type_for(audio).first.content_type
@@ -51,9 +60,10 @@ class TelegramBot
 
   def caption ps
     t  = "*Prabhat Samgiit ##{ps.number.to_i}: #{ps.name}*"
-    t += "\n\n#{i e ps.lyrics.roman}" if ps.lyrics.original
+    t += "\n\n#{i e ps.lyrics.roman}" if ps.lyrics.roman
     t += "\n\n#{i e ps.lyrics.translation}"
     t += "\n\n#{e ps.url}"
+    t += "\n(No audio available)" if !ps.filename
     me t
   end
 

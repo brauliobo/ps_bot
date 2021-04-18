@@ -27,7 +27,7 @@ class Sarkarverse
     path = row.at(:a).attr :href
     url  = "#{BASE_URL}#{path}"
     page = cached_http.page_get url
-    name = page.at(:h1).text
+    name = page.at(:h1).text.strip
 
     if lyrics = page.at('h2:contains("Lyrics") + table.wikitable')
       lyrics  = page.css('.poem').map{ |l| l.text.strip }
